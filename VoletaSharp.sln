@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{69973574-DF7
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VoletaSharp.Compiler", "src\VoletaSharp.Compiler\VoletaSharp.Compiler.fsproj", "{4B4AF6B7-1EFA-454F-AFAF-988C5AC978A7}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "VoletaSharp.Backend", "src\VoletaSharp.Backend\VoletaSharp.Backend.fsproj", "{4AE7D605-6D63-49D1-A858-BE41C318B9A7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +22,13 @@ Global
 		{4B4AF6B7-1EFA-454F-AFAF-988C5AC978A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B4AF6B7-1EFA-454F-AFAF-988C5AC978A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B4AF6B7-1EFA-454F-AFAF-988C5AC978A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4AE7D605-6D63-49D1-A858-BE41C318B9A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4AE7D605-6D63-49D1-A858-BE41C318B9A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4AE7D605-6D63-49D1-A858-BE41C318B9A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4AE7D605-6D63-49D1-A858-BE41C318B9A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4B4AF6B7-1EFA-454F-AFAF-988C5AC978A7} = {69973574-DF76-47E6-994E-CA5606F83997}
+		{4AE7D605-6D63-49D1-A858-BE41C318B9A7} = {69973574-DF76-47E6-994E-CA5606F83997}
 	EndGlobalSection
 EndGlobal
