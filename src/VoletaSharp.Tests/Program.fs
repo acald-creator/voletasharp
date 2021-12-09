@@ -1,4 +1,6 @@
-﻿
+﻿open NUnit.Framework
+open FsUnit
 
-// For more information see https://aka.ms/fsharp-console-apps
-printfn "Hello from F#"
+[<Test>]
+let ``test hello`` () =
+    5 + 1 |> should equal 6
