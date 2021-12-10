@@ -13,4 +13,8 @@
     <ProjectReference Include="..\VoletaSharp.Compiler\VoletaSharp.Compiler.fsproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="7.0.0-*" />
+  </ItemGroup>
+
 </Project>
