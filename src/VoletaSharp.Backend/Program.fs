@@ -1,7 +1,10 @@
 ﻿open System
 
+
+
 [<EntryPoint>]
 let main argv =
-    let who = if argv.Length = 0 then "F#" else argv.[0]
-    printfn "Hello world from %s" who
+    let input = if argv.Length = 0 then "" else argv.[0]
+    let result = readExpression input
+    printfn "%s\n" result
     0
