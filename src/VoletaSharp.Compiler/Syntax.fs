@@ -1,22 +1,22 @@
 namespace VoletaSharp.Compiler
 
 module Syntax =
-    type Factor =
-        | Digit of int
-        | ParenthesisExpression of Expression
-
-    and AddOperator =
+    type AddOperator =
         | Plus
         | Minus
 
-    and MultiplyOperator =
+    type MultiplyOperator =
         | Times
         | DividedBy
 
+    type Factor =
+        | Digit of int
+        | ParenthesisExpression of Expr
+
     and Term =
-        | MultiplyOperator of Term * Factor
+        | MulOp of Term * MultiplyOperator * Factor
         | Factor of Factor
 
     and Expr =
-        | AddOperator of Expression * Term
+        | AddOp of Expr * AddOperator * Term
         | Term of Term

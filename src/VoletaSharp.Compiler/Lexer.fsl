@@ -1,0 +1,23 @@
+{
+module VoletaSharp.Compiler.Lexer
+
+open FSharp.Text.Lexing
+open VoletaSharp.Compiler.Parser
+
+let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
+}
+
+let digit = ['0'-'9']
+let whitespace = [' ' '\t' '\r' '\n']
+
+rule tokenize = parse
+| whitespace { tokenize lexbuf }
+| digit+     { NUMBER (int (lexeme lexbuf)) }
+| '+'        { PLUS }
+| '-'        { MINUS }
+| '*'        { TIMES }
+| '/'        { DIVIDEDBY }
+| '('        { LPAREN }
+| ')'        { RPAREN }
+| eof        { EOF }
+| _          { failwithf "Unexpected character: %s" (lexeme lexbuf) }

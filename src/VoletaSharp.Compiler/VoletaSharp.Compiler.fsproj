@@ -1,12 +1,29 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GenerateFsl>true</GenerateFsl>
+    <GenerateFsy>true</GenerateFsy>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Syntax.fs" />
+    <FsYacc Include="Parser.fsy">
+      <OtherFlags>--module VoletaSharp.Compiler.Parser</OtherFlags>
+    </FsYacc>
+    <FsLex Include="Lexer.fsl">
+      <OtherFlags>--unicode</OtherFlags>
+    </FsLex>
+    <Compile Include="Parser.fs" />
     <Compile Include="Lexer.fs" />
+    <Compile Include="CodeGen.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FsLexYacc" Version="11.3.0" PrivateAssets="all" />
+    <PackageReference Include="FsLexYacc.Runtime" Version="11.3.0" />
+    <PackageReference Include="LLVMSharp" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

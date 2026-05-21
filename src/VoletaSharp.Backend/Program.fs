@@ -1,6 +1,18 @@
-﻿open System
+open System
+open FSharp.Text.Lexing
+open VoletaSharp.Compiler
 
-
+let readExpression (input: string) : string =
+    if String.IsNullOrWhiteSpace(input) then
+        "Please provide an expression to parse."
+    else
+        try
+            let lexbuf = LexBuffer<char>.FromString input
+            let ast = Parser.start Lexer.tokenize lexbuf
+            let ir = CodeGen.compileToIR ast
+            sprintf "Parsed AST: %A\n\nGenerated LLVM IR:\n%s" ast ir
+        with
+        | ex -> sprintf "Error: %s" ex.Message
 
 [<EntryPoint>]
 let main argv =

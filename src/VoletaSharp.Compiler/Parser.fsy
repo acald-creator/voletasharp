@@ -1,0 +1,28 @@
+%{
+open VoletaSharp.Compiler.Syntax
+%}
+
+%token <int> NUMBER
+%token PLUS MINUS TIMES DIVIDEDBY LPAREN RPAREN
+%token EOF
+
+%start start
+%type <VoletaSharp.Compiler.Syntax.Expr> start
+
+%%
+
+start: Expr EOF { $1 }
+
+Expr:
+    | Expr PLUS Term { AddOp($1, Plus, $3) }
+    | Expr MINUS Term { AddOp($1, Minus, $3) }
+    | Term { Term($1) }
+
+Term:
+    | Term TIMES Factor { MulOp($1, Times, $3) }
+    | Term DIVIDEDBY Factor { MulOp($1, DividedBy, $3) }
+    | Factor { Factor($1) }
+
+Factor:
+    | NUMBER { Digit($1) }
+    | LPAREN Expr RPAREN { ParenthesisExpression($2) }
