@@ -1,17 +1,26 @@
+#nowarn "9"
+
 namespace VoletaSharp.Compiler
 
 module CodeGen =
-    open LLVMSharp
+    open LLVMSharp.Interop
+    open Microsoft.FSharp.NativeInterop
     open VoletaSharp.Compiler.Syntax
 
-    let rec codegenFactor (context: LLVMContextRef) (builder: LLVMBuilderRef) (factor: Factor) : LLVMValueRef =
+    let withString (s: string) (f: nativeptr<sbyte> -> 'a) : 'a =
+        let bytes = System.Text.Encoding.UTF8.GetBytes(s + "\u0000")
+        use p = fixed bytes
+        let sptr = p |> NativePtr.toVoidPtr |> NativePtr.ofVoidPtr
+        f sptr
+
+    let rec codegenFactor (context: nativeptr<LLVMOpaqueContext>) (builder: nativeptr<LLVMOpaqueBuilder>) (factor: Factor) : nativeptr<LLVMOpaqueValue> =
         match factor with
         | Digit n ->
-            LLVM.ConstInt(LLVM.Int32TypeInContext(context), uint64 n, false)
+            LLVM.ConstInt(LLVM.Int32TypeInContext(context), uint64 n, 0)
         | ParenthesisExpression expr ->
             codegenExpr context builder expr
 
-    and codegenTerm (context: LLVMContextRef) (builder: LLVMBuilderRef) (term: Term) : LLVMValueRef =
+    and codegenTerm (context: nativeptr<LLVMOpaqueContext>) (builder: nativeptr<LLVMOpaqueBuilder>) (term: Term) : nativeptr<LLVMOpaqueValue> =
         match term with
         | Factor f ->
             codegenFactor context builder f
@@ -19,10 +28,10 @@ module CodeGen =
             let lhs = codegenTerm context builder left
             let rhs = codegenFactor context builder right
             match op with
-            | Times -> LLVM.BuildMul(builder, lhs, rhs, "multmp")
-            | DividedBy -> LLVM.BuildSDiv(builder, lhs, rhs, "sdivtmp")
+            | Times -> withString "multmp" (fun name -> LLVM.BuildMul(builder, lhs, rhs, name))
+            | DividedBy -> withString "sdivtmp" (fun name -> LLVM.BuildSDiv(builder, lhs, rhs, name))
 
-    and codegenExpr (context: LLVMContextRef) (builder: LLVMBuilderRef) (expr: Expr) : LLVMValueRef =
+    and codegenExpr (context: nativeptr<LLVMOpaqueContext>) (builder: nativeptr<LLVMOpaqueBuilder>) (expr: Expr) : nativeptr<LLVMOpaqueValue> =
         match expr with
         | Term t ->
             codegenTerm context builder t
@@ -30,18 +39,20 @@ module CodeGen =
             let lhs = codegenExpr context builder left
             let rhs = codegenTerm context builder right
             match op with
-            | Plus -> LLVM.BuildAdd(builder, lhs, rhs, "addtmp")
-            | Minus -> LLVM.BuildSub(builder, lhs, rhs, "subtmp")
+            | Plus -> withString "addtmp" (fun name -> LLVM.BuildAdd(builder, lhs, rhs, name))
+            | Minus -> withString "subtmp" (fun name -> LLVM.BuildSub(builder, lhs, rhs, name))
 
     let compileToIR (expr: Expr) : string =
         let context = LLVM.GetGlobalContext()
-        let themodule = LLVM.ModuleCreateWithNameInContext("voleta_module", context)
+        let themodule = withString "voleta_module" (fun name -> LLVM.ModuleCreateWithNameInContext(name, context))
         let builder = LLVM.CreateBuilderInContext(context)
 
         // Define: int main()
-        let fnType = LLVM.FunctionType(LLVM.Int32TypeInContext(context), [||], false)
-        let mainFn = LLVM.AddFunction(themodule, "main", fnType)
-        let entryBlock = LLVM.AppendBasicBlock(mainFn, "entry")
+        let paramTypes : nativeptr<LLVMOpaqueType>[] = [||]
+        use paramTypesPtr = fixed paramTypes
+        let fnType = LLVM.FunctionType(LLVM.Int32TypeInContext(context), paramTypesPtr, 0u, 0)
+        let mainFn = withString "main" (fun name -> LLVM.AddFunction(themodule, name, fnType))
+        let entryBlock = withString "entry" (fun name -> LLVM.AppendBasicBlock(mainFn, name))
         LLVM.PositionBuilderAtEnd(builder, entryBlock)
 
         // Generate AST instructions
@@ -50,7 +61,7 @@ module CodeGen =
 
         // Output IR to string
         let irPtr = LLVM.PrintModuleToString(themodule)
-        let irString = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(irPtr)
+        let irString = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(System.IntPtr(irPtr |> NativePtr.toVoidPtr))
         LLVM.DisposeMessage(irPtr)
 
         // Clean up

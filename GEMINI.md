@@ -13,7 +13,7 @@ This document provides context, architecture descriptions, and build instruction
   Term   ::= Term '*' Factor | Term '/' Factor | Factor
   Factor ::= Digit | '(' Expr ')'
   ```
-- **Backend Target**: LLVM IR (32-bit integer result) using **LLVMSharp 5.0.0** static APIs.
+- **Backend Target**: LLVM IR (32-bit integer result) using **LLVMSharp 20.1.2** static APIs.
 - **Compilation Model**: Native Ahead-of-Time (AOT) compilation enabled for the final runner application.
 
 ---
@@ -35,7 +35,7 @@ This document provides context, architecture descriptions, and build instruction
 
 - **.NET SDK**: `.NET 8.0` (or newer).
 - **Lexer/Parser**: `FsLexYacc` (v11.3.0) and `FsLexYacc.Runtime`.
-- **LLVM Binding**: `LLVMSharp` (v5.0.0). Note that LLVMSharp 5.0.0 uses **static methods on the `LLVM` class** (e.g., `LLVM.CreateBuilderInContext`) rather than object-oriented instance methods.
+- **LLVM Binding**: `LLVMSharp` (v20.1.2), `libLLVM` (v20.1.2), `libLLVM.runtime.win-x64` (v20.1.2). Note that LLVMSharp 20.1.2 uses **raw pointers** (e.g. `nativeptr<LLVMOpaqueValue>`) and static methods on the `LLVM` class (e.g., `LLVM.CreateBuilderInContext`).
 
 ---
 
@@ -66,5 +66,5 @@ dotnet publish src/VoletaSharp.Backend/VoletaSharp.Backend.fsproj -r win-x64 -c 
 
 ## 5. Guidelines for Code Modifications
 1. **FsLexYacc Indentation**: Do not add leading spaces or indentation to F# helper blocks `{ ... }` inside `.fsl` or `.fsy` files. Indentations are copied verbatim and will violate F#'s offside rule, causing compile failures in the generated `.fs` files.
-2. **Unmanaged String Marshalling**: Native LLVM functions like `LLVM.PrintModuleToString` return `IntPtr`/`nativeint`. Always convert these to standard .NET strings using `System.Runtime.InteropServices.Marshal.PtrToStringAnsi` and free the memory via `LLVM.DisposeMessage`.
+2. **Unmanaged String Marshalling**: Native LLVM functions like `LLVM.PrintModuleToString` return `sbyte*` (`nativeptr<sbyte>`). Always convert these to standard .NET strings using `System.Runtime.InteropServices.Marshal.PtrToStringAnsi` and free the memory via `LLVM.DisposeMessage`. All string inputs (like instruction/block/module/function names) must be marshalled as null-terminated UTF-8 native sbyte pointers (`nativeptr<sbyte>`).
 3. **AST Updates**: Keep AST modifications in `Syntax.fs` simple and clear. Ensure union constructor names do not conflict with type names.
